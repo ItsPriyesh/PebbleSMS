@@ -10,6 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -49,7 +50,7 @@ public class ContactPickerFragment extends DialogFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        getDialog().setTitle("Select contacts");
+        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         final View view = inflater.inflate(R.layout.fragment_contact_picker, container, false);
         mContactsListView = ButterKnife.findById(view, R.id.list_view);
