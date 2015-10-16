@@ -17,20 +17,18 @@ import me.priyesh.pebblesms.model.Contact;
 
 public class ContactsAdapter extends ArrayAdapter<Contact> {
 
-    private final ArrayList<Contact> mContactsFinal;
     private ArrayList<Contact> mContacts;
 
     public ContactsAdapter(Context context, ArrayList<Contact> contacts) {
         super(context, 0, contacts);
         this.mContacts = contacts;
-        this.mContactsFinal = (ArrayList<Contact>) contacts.clone();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.contact_picker_list_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.contact_list_item, parent, false);
 
             holder = new ViewHolder();
             holder.name = ButterKnife.findById(convertView, R.id.title);
@@ -82,15 +80,6 @@ public class ContactsAdapter extends ArrayAdapter<Contact> {
             if (c.isSelected) selectedContacts.add(c);
 
         return selectedContacts;
-    }
-
-    public List<Contact> getAllContacts() {
-        return mContacts;
-    }
-
-    public void selectAllContacts(boolean select) {
-        for (Contact c : mContacts) c.isSelected = select;
-        notifyDataSetChanged();
     }
 
 }

@@ -49,10 +49,21 @@ public class ContactPickerFragment extends DialogFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_contact_picker_dialog, container, false);
+        getDialog().setTitle("Select contacts");
+
+        final View view = inflater.inflate(R.layout.fragment_contact_picker, container, false);
         mContactsListView = ButterKnife.findById(view, R.id.list_view);
         mProgressBar = ButterKnife.findById(view, R.id.progress_bar);
+
+        ButterKnife.findById(view, R.id.positive_button).setOnClickListener(v -> onPositiveButtonClicked());
+        ButterKnife.findById(view, R.id.negative_button).setOnClickListener(v -> dismiss());
+
         return view;
+    }
+
+    private void onPositiveButtonClicked() {
+        mListener.onContactsSelected(mContactsAdapter.getSelectedContacts());
+        dismiss();
     }
 
     @Override

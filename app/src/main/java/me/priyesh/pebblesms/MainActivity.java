@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import java.util.List;
 
@@ -18,13 +19,14 @@ import me.priyesh.pebblesms.model.Contact;
 
 public class MainActivity extends AppCompatActivity implements ContactPickerFragment.OnContactsSelectedListener {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_READ_CONTACTS_PERMISSION = 0xbeef;
+
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
 
     @Bind(R.id.fab)
     FloatingActionButton mFab;
-
-    private static final int REQUEST_READ_CONTACTS_PERMISSION = 0xbeef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements ContactPickerFrag
 
     @Override
     public void onContactsSelected(List<Contact> contacts) {
-
+        for (Contact c : contacts) {
+            Log.d(TAG, c.name);
+        }
     }
 }
