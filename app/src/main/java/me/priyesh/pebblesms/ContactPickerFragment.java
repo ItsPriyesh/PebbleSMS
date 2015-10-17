@@ -1,16 +1,14 @@
 package me.priyesh.pebblesms;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
-import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -23,11 +21,11 @@ import java.util.List;
 import butterknife.ButterKnife;
 import me.priyesh.pebblesms.model.Contact;
 
-public class ContactPickerFragment extends DialogFragment {
+public class ContactPickerFragment extends Fragment {
 
     public static final String TAG = ContactPickerFragment.class.getSimpleName();
-    
-    private OnContactsSelectedListener mListener;
+
+    private ContactLoaderListener mListener;
     private ArrayList<Contact> mContacts;
     private ContactsAdapter mContactsAdapter;
     private ListView mContactsListView;
@@ -36,8 +34,9 @@ public class ContactPickerFragment extends DialogFragment {
     private final Handler mHandler = new Handler();
     private final Runnable mContactsQueryComplete = this::onContactsQueryComplete;
 
-    public interface OnContactsSelectedListener {
-        void onContactsSelected(List<Contact> contacts);
+    public interface ContactLoaderListener {
+        void onContactsLoaded();
+        void onNoContactsFound();
     }
 
     public ContactPickerFragment() { /* Required empty public constructor */ }
@@ -46,40 +45,19 @@ public class ContactPickerFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         startContactsQuery();
+        mListener = (ContactLoaderListener) getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         final View view = inflater.inflate(R.layout.fragment_contact_picker, container, false);
         mContactsListView = ButterKnife.findById(view, R.id.list_view);
         mProgressBar = ButterKnife.findById(view, R.id.progress_bar);
-
-        ButterKnife.findById(view, R.id.positive_button).setOnClickListener(v -> onPositiveButtonClicked());
-        ButterKnife.findById(view, R.id.negative_button).setOnClickListener(v -> dismiss());
-
         return view;
     }
 
-    private void onPositiveButtonClicked() {
-        mListener.onContactsSelected(mContactsAdapter.getSelectedContacts());
-        dismiss();
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try { mListener = (OnContactsSelectedListener) activity; }
-        catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    public List<Contact> getSelectedContacts() {
+        return mContactsAdapter.getSelectedContacts();
     }
 
     private void startContactsQuery() {
@@ -96,9 +74,12 @@ public class ContactPickerFragment extends DialogFragment {
         new Handler().postDelayed(() -> {
             mProgressBar.setVisibility(View.GONE);
             if (mContacts.size() != 0) {
+                mListener.onContactsLoaded();
                 mContactsAdapter = new ContactsAdapter(getActivity(), mContacts);
                 mContactsListView.setAdapter(mContactsAdapter);
                 mContactsListView.setVisibility(View.VISIBLE);
+            } else {
+                mListener.onNoContactsFound();
             }
         }, getResources().getInteger(android.R.integer.config_mediumAnimTime));
     }

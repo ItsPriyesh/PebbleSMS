@@ -9,15 +9,11 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import me.priyesh.pebblesms.model.Contact;
 
-public class MainActivity extends AppCompatActivity implements ContactPickerFragment.OnContactsSelectedListener {
+public class MainActivity extends AppCompatActivity implements ContactPickerFragment.ContactLoaderListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_READ_CONTACTS_PERMISSION = 0xbeef;
@@ -35,21 +31,30 @@ public class MainActivity extends AppCompatActivity implements ContactPickerFrag
         ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
 
+        if (isMarshmallow()) {
+            if (canReadContacts()) loadContactPickerFragment();
+            else requestReadContactsPermission();
+        } else {
+            loadContactPickerFragment();
+        }
+
         mFab.setOnClickListener(v -> {
-            if (isMarshmallow()) {
-                if (canReadContacts()) showContactsPicker();
-                else requestReadContactsPermission();
-            } else {
-                showContactsPicker();
-            }
+
         });
+    }
+
+    private void loadContactPickerFragment() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.container, new ContactPickerFragment())
+                .commit();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_READ_CONTACTS_PERMISSION) {
-            new Handler().post(this::showContactsPicker);
+            new Handler().post(this::loadContactPickerFragment);
         }
     }
 
@@ -67,14 +72,13 @@ public class MainActivity extends AppCompatActivity implements ContactPickerFrag
         requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_READ_CONTACTS_PERMISSION);
     }
 
-    private void showContactsPicker() {
-        new ContactPickerFragment().show(getSupportFragmentManager(), ContactPickerFragment.TAG);
+    @Override
+    public void onContactsLoaded() {
+        mFab.show();
     }
 
     @Override
-    public void onContactsSelected(List<Contact> contacts) {
-        for (Contact c : contacts) {
-            Log.d(TAG, c.name);
-        }
+    public void onNoContactsFound() {
+        mFab.hide();
     }
 }

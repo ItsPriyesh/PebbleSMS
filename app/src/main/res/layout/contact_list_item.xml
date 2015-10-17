@@ -6,8 +6,8 @@
     android:clickable="true"
     android:background="?attr/selectableItemBackground"
     android:clipToPadding="false"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:paddingLeft="32dp"
+    android:paddingRight="32dp">
 
     <LinearLayout
         android:layout_width="wrap_content"
