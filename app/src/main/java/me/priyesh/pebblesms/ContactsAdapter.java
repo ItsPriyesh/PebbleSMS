@@ -17,11 +17,17 @@ import me.priyesh.pebblesms.model.Contact;
 
 public class ContactsAdapter extends ArrayAdapter<Contact> {
 
-    private ArrayList<Contact> mContacts;
+    private final ArrayList<Contact> mContacts;
+    private final ContactToggleListener mListener;
 
-    public ContactsAdapter(Context context, ArrayList<Contact> contacts) {
+    public interface ContactToggleListener {
+        void onContactToggled(int selectedContactsSize);
+    }
+
+    public ContactsAdapter(Context context, ArrayList<Contact> contacts, ContactToggleListener listener) {
         super(context, 0, contacts);
-        this.mContacts = contacts;
+        mContacts = contacts;
+        mListener = listener;
     }
 
     @Override
@@ -64,6 +70,7 @@ public class ContactsAdapter extends ArrayAdapter<Contact> {
     private CompoundButton.OnCheckedChangeListener checkBoxListener = (view, checked) -> {
         final Contact contact = (Contact) view.getTag();
         contact.isSelected = checked;
+        dispatchContactToggled();
         notifyDataSetChanged();
     };
 
@@ -71,6 +78,10 @@ public class ContactsAdapter extends ArrayAdapter<Contact> {
         TextView name;
         TextView phone;
         CheckBox checkBox;
+    }
+
+    private void dispatchContactToggled() {
+        mListener.onContactToggled(getSelectedContacts().size());
     }
 
     public List<Contact> getSelectedContacts() {

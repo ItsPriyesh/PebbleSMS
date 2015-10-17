@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -23,15 +24,18 @@ import java.util.List;
 import butterknife.ButterKnife;
 import me.priyesh.pebblesms.model.Contact;
 
-public class ContactPickerFragment extends DialogFragment {
+public class ContactPickerFragment extends DialogFragment implements ContactsAdapter.ContactToggleListener {
 
     public static final String TAG = ContactPickerFragment.class.getSimpleName();
-    
+
+    private static final int MAX_CONTACTS = 5;
+
     private OnContactsSelectedListener mListener;
     private ArrayList<Contact> mContacts;
     private ContactsAdapter mContactsAdapter;
     private ListView mContactsListView;
     private ProgressBar mProgressBar;
+    private Button mPositiveButton;
 
     private final Handler mHandler = new Handler();
     private final Runnable mContactsQueryComplete = this::onContactsQueryComplete;
@@ -56,7 +60,9 @@ public class ContactPickerFragment extends DialogFragment {
         mContactsListView = ButterKnife.findById(view, R.id.list_view);
         mProgressBar = ButterKnife.findById(view, R.id.progress_bar);
 
-        ButterKnife.findById(view, R.id.positive_button).setOnClickListener(v -> onPositiveButtonClicked());
+        mPositiveButton = ButterKnife.findById(view, R.id.positive_button);
+        mPositiveButton.setOnClickListener(v -> onPositiveButtonClicked());
+
         ButterKnife.findById(view, R.id.negative_button).setOnClickListener(v -> dismiss());
 
         return view;
@@ -65,6 +71,11 @@ public class ContactPickerFragment extends DialogFragment {
     private void onPositiveButtonClicked() {
         mListener.onContactsSelected(mContactsAdapter.getSelectedContacts());
         dismiss();
+    }
+
+    @Override
+    public void onContactToggled(int selectedContactsSize) {
+        mPositiveButton.setEnabled(selectedContactsSize <= MAX_CONTACTS);
     }
 
     @Override
@@ -96,7 +107,7 @@ public class ContactPickerFragment extends DialogFragment {
         new Handler().postDelayed(() -> {
             mProgressBar.setVisibility(View.GONE);
             if (mContacts.size() != 0) {
-                mContactsAdapter = new ContactsAdapter(getActivity(), mContacts);
+                mContactsAdapter = new ContactsAdapter(getActivity(), mContacts, this);
                 mContactsListView.setAdapter(mContactsAdapter);
                 mContactsListView.setVisibility(View.VISIBLE);
             }
