@@ -28,7 +28,7 @@ public class ContactPickerFragment extends DialogFragment implements ContactsAda
 
     public static final String TAG = ContactPickerFragment.class.getSimpleName();
 
-    private static final int MAX_CONTACTS = 5;
+    public static final int MAX_CONTACTS = 5;
 
     private OnContactsSelectedListener mListener;
     private ArrayList<Contact> mContacts;
@@ -83,7 +83,7 @@ public class ContactPickerFragment extends DialogFragment implements ContactsAda
         super.onAttach(activity);
         try { mListener = (OnContactsSelectedListener) activity; }
         catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
+            throw new ClassCastException(activity.toString() + " must implement OnContactsSelectedListener");
         }
     }
 

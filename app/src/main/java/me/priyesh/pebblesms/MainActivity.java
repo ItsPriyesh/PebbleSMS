@@ -7,9 +7,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.View;
 
 import java.util.List;
 
@@ -25,8 +28,13 @@ public class MainActivity extends AppCompatActivity implements ContactPickerFrag
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
 
+    @Bind(R.id.recycler_view)
+    RecyclerView mRecyclerView;
+
     @Bind(R.id.fab)
     FloatingActionButton mFab;
+
+    private int contactSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,21 +43,38 @@ public class MainActivity extends AppCompatActivity implements ContactPickerFrag
         ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
 
-        mFab.setOnClickListener(v -> {
-            if (isMarshmallow()) {
-                if (canReadContacts()) showContactsPicker();
-                else requestReadContactsPermission();
-            } else {
-                showContactsPicker();
-            }
-        });
+        final Preferences preferences = Preferences.getInstance(this);
+        contactSize = preferences.getInt(Preferences.Key.CONTACTS_SIZE, 0);
+
+        mFab.setOnClickListener(onFabClickListener);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
+
+    private View.OnClickListener onFabClickListener = v -> {
+        if (contactSize >= ContactPickerFragment.MAX_CONTACTS) {
+            Snackbar.make(v, "Contact limit has been reached", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (isMarshmallow()) {
+            if (canReadContacts()) showContactsPicker();
+            else requestReadContactsPermission();
+        } else {
+            showContactsPicker();
+        }
+    };
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_READ_CONTACTS_PERMISSION) {
-            new Handler().post(this::showContactsPicker);
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                new Handler().post(this::showContactsPicker);
+            } else {
+                Snackbar.make(mFab, "Unable to access contacts", Snackbar.LENGTH_LONG)
+                        .setAction("Retry", onFabClickListener).show();
+            }
         }
     }
 
@@ -73,8 +98,10 @@ public class MainActivity extends AppCompatActivity implements ContactPickerFrag
 
     @Override
     public void onContactsSelected(List<Contact> contacts) {
-        for (Contact c : contacts) {
-            Log.d(TAG, c.name);
-        }
+        mRecyclerView.setAdapter(new ContactCardAdapter(contacts));
+    }
+
+    private void showContactEditor(Contact contact) {
+
     }
 }

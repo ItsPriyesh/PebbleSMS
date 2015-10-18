@@ -2,8 +2,8 @@ package me.priyesh.pebblesms.model;
 
 public class Contact {
 
-    public final String name;
-    public final String phone;
+    public String name;
+    public String phone;
     public boolean isSelected;
 
     public Contact(String name, String phone) {
