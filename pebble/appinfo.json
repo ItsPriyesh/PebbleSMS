@@ -1,0 +1,18 @@
+{
+  "uuid": "748617b1-45a7-4fde-ba79-acd62a145962",
+  "shortName": "pebbleSMS",
+  "longName": "pebbleSMS",
+  "companyName": "MakeAwesomeHappen",
+  "versionLabel": "1.0",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt", "chalk"],
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
