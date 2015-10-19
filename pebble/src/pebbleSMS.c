@@ -56,6 +56,11 @@ static void setup_menu() {
 
 // Click handlers
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_cstring(iter, 0, "hello");
+  app_message_outbox_send();
+
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -90,7 +95,7 @@ static void inbox_dropped_callback(AppMessageResult reason, void *context) {
 }
 
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed! %d", (int) reason);
 }
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
@@ -117,10 +122,10 @@ static void init(void) {
                                                  dictation_session_callback, NULL);
 
   // app message
-  app_message_register_inbox_received(inbox_received_callback);
-  app_message_register_inbox_dropped(inbox_dropped_callback);
-  app_message_register_outbox_failed(outbox_failed_callback);
-  app_message_register_outbox_sent(outbox_sent_callback);
+  APP_LOG(APP_LOG_LEVEL_INFO, "%d", (int) app_message_register_inbox_received(inbox_received_callback));
+  APP_LOG(APP_LOG_LEVEL_INFO, "%d", (int) app_message_register_inbox_dropped(inbox_dropped_callback));
+  APP_LOG(APP_LOG_LEVEL_INFO, "%d", (int) app_message_register_outbox_failed(outbox_failed_callback));
+  APP_LOG(APP_LOG_LEVEL_INFO, "%d", (int) app_message_register_outbox_sent(outbox_sent_callback));
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
   window = window_create();
